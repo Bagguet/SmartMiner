@@ -1,0 +1,8 @@
+docker
+requests
+beautifulsoup4
+lxml
+selenium
+webdriver-manager
+fake-useragent
+selenium-stealth

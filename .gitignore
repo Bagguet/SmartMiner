@@ -1,0 +1,16 @@
+**/__pycache__/
+*.pyc
+manager/venv/
+venv/
+.env
+json/wallets.json
+*.log
+
+*.png
+json/*.png
+
+manager/lastCoin.txt
+
+.DS_Store
+.vscode/
+.idea/
