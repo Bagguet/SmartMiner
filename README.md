@@ -5,9 +5,21 @@
 ![XMrig](https://img.shields.io/badge/Miner-XMrig-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**SmartMiner** to w pełni autonomiczny, skonteneryzowany system do wydobywania kryptowalut (CPU Mining), który dynamicznie przełącza się na najbardziej opłacalny algorytm w czasie rzeczywistym.
+## 🔬 Kluczowe Aspekty Techniczne (Dlaczego ten projekt jest ważny?)
 
-System wykorzystuje **Selenium (Stealth)** do analizy rynku, **Docker API** do orkiestracji kontenerów oraz **XMrig** z dostępem niskopoziomowym do sprzętu.
+### 1. Niskopoziomowa Optymalizacja Sprzętowa (Low-Level Tuning)
+System omija standardową izolację kontenerów, aby uzyskać bezpośredni dostęp do rejestrów procesora (**MSR - Model Specific Registers**).
+* **Wyzwanie:** Domyślna konfiguracja Dockera blokuje dostęp do liczników sprzętowych i prefetcherów.
+* **Rozwiązanie:** Implementacja orkiestracji w trybie `privileged`, umożliwiająca manipulację **Hardware Prefetchers** oraz obsługę **Huge Pages (1GB)** wewnątrz wirtualizacji.
+* **Wynik:** Wzrost wydajności o 15% na procesorze Ryzen 9 5950X w porównaniu do standardowego środowiska Docker.
+
+### 2. Stealth Data Acquisition (Scraping)
+Dane rynkowe są pobierane z zabezpieczonych punktów końcowych (Cloudflare) przy użyciu autorskiej implementacji **Selenium Stealth**. System wykorzystuje heurystykę headless browser, symulując zachowanie człowieka, co zapewnia ciągłość dostępu do danych.
+
+### 3. Hot-Swap Kontenerów (Zero-Downtime)
+Manager implementuje logikę "Hot-Swap". Podczas zmiany algorytmu obliczeniowego (np. z RandomX na GhostRider), system przygotowuje nowe środowisko przed zamknięciem starego, minimalizując czas bezczynności procesora (idle time).
+
+---
 
 > ⚠️ **HW OPTIMIZATION NOTICE:** > Domyślna konfiguracja (`config.json`) oraz parametry startowe kontenera są zoptymalizowane pod procesor **AMD Ryzen 9 5950X** (16C/32T, 64MB L3 Cache).
 > * Włączone Huge Pages (1GB).

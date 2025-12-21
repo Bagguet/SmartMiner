@@ -9,7 +9,7 @@ services:
       - CHROME_BIN=/usr/bin/chromium
       - CHROMEDRIVER_PATH=/usr/bin/chromedriver
       - PYTHONUNBUFFERED=1
-        - HOST_JSON_PATH=${PWD}/json
+      - HOST_JSON_PATH=${PWD}/json
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./json:/app/json
