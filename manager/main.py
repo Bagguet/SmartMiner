@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import datetime
+import threading
 
 try:
     import soupManger as Sm
@@ -26,13 +27,78 @@ PATH_WALLETS = 'json/wallets.json'
 PATH_POOLS = 'json/pools.json'
 PATH_LINKS = 'links.txt' 
 
-def log(msg):
-    """Pomocnicze logowanie z datą"""
-    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+PIPE_PATH = "/tmp/miner_comm" 
+MINER_PAUSED = False           
+LOGS_ENABLED = True
+
+WAKE_UP_EVENT = threading.Event()
+
+def log(msg, force=False):
+    """Pomocnicze logowanie z datą."""
+    if LOGS_ENABLED or force:
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+def stop_current_container():
+    """Helper do zabicia kontenera z minerem"""
+    try:
+        container = CLIENT.containers.get(CONTAINER_NAME)
+        if container.status == 'running':
+            log(f"[COMMAND] Zatrzymywanie kontenera {CONTAINER_NAME}...", force=True)
+            container.stop()
+            container.remove()
+            log("[COMMAND] Kontener zatrzymany.", force=True)
+    except docker.errors.NotFound:
+        log("[COMMAND] Kontener już nie istnieje.", force=True)
+    except Exception as e:
+        log(f"[ERROR] Nie udało się zatrzymać kontenera: {e}", force=True)
+
+
+def listen_for_commands():
+    """Background thread that listens for text commands."""
+    global MINER_PAUSED, LOGS_ENABLED
+    
+    # Create the pipe if it doesn't exist
+    if not os.path.exists(PIPE_PATH):
+        try:
+            os.mkfifo(PIPE_PATH)
+        except OSError as e:
+            print(f"[ERROR] Nie udało się stworzyć potoku: {e}")
+            return
+
+    print(f"[SYSTEM] Nasłuchuję komend w {PIPE_PATH}...", flush=True)
+    
+    while True:
+        try:
+            # This blocks until something is written to the pipe
+            with open(PIPE_PATH, "r") as pipe:
+                for line in pipe:
+                    cmd = line.strip()
+                    
+                    if cmd == "miner stop":
+                        MINER_PAUSED = True
+                        log("!!! OTRZYMANO KOMENDĘ: MINER STOP !!!", force=True)
+                        stop_current_container()
+                        
+                    elif cmd == "miner start":
+                        MINER_PAUSED = False
+                        log("!!! OTRZYMANO KOMENDĘ: MINER START !!!", force=True)
+                        log("!!! Waking up main loop immediately... !!!", force=True)
+                        WAKE_UP_EVENT.set()
+
+                        
+                    elif cmd == "status":
+                        status = "PAUSED" if MINER_PAUSED else "RUNNING"
+                        log(f"[STATUS] Tryb: {status} | Logi: {LOGS_ENABLED}", force=True)
+
+        except Exception as e:
+            print(f"[PIPE ERROR] {e}")
+            time.sleep(1)
 
 def get_best_coin_logic():
-    """To jest logika żywcem wyjęta z Twojego bestToMine.py"""
-    
+    """Logika do oceny którego coina najlepiej kopać"""
+    if MINER_PAUSED:
+        return None
+
     urls = []
     coins = []
     
@@ -91,6 +157,10 @@ def get_best_coin_logic():
     return best_one
 
 def manage_worker(best_coin):
+    """Zarządzanie minerem"""
+    if MINER_PAUSED:
+        return None
+
     if not best_coin:
         return
 
@@ -142,10 +212,17 @@ def manage_worker(best_coin):
 if __name__ == "__main__":
     log("--- SmartMiner Manager v1.0 Started ---")
     
+    listener_thread = threading.Thread(target=listen_for_commands, daemon=True)
+    listener_thread.start()
+    
     while True:
-        best = get_best_coin_logic()
-        manage_worker(best)
-        
-        minutes = 15
-        log(f"Uypianie na {minutes} minut...")
-        time.sleep(minutes * 60)
+        minutes = 180
+        WAKE_UP_EVENT.clear()
+        if not MINER_PAUSED:
+            best = get_best_coin_logic()
+            manage_worker(best)
+            log(f"[INFO] Za {minutes} nastąpi kolejne sprawdzenie opłacalności...")
+        else:
+            log("[INFO] Miner jest zapauzowany (użyj 'miner start' aby wznowić).")
+
+        WAKE_UP_EVENT.wait(timeout=minutes * 60)

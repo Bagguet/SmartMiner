@@ -2,6 +2,7 @@ services:
   manager:
     build: 
       context: ./manager
+    image: smartminer_manager_img:latest
     container_name: smartminer_manager
     restart: unless-stopped
     privileged: true
