@@ -30,7 +30,7 @@
         "huge-pages": true,
         "huge-pages-jit": true,
         "hw-aes": null,
-        "priority": 5,
+        "priority": 1,
         "memory-pool": false,
         "yield": true,
         "asm": true,
