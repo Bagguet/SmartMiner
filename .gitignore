@@ -16,3 +16,6 @@ manager/lastCoin.txt
 .idea/
 
 smartminer_images.tar
+
+json/status.json
+dashboard/config.py

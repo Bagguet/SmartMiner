@@ -1,104 +1,110 @@
-# SmartMiner - Autonomous Crypto Mining Docker Cluster ⛏️🤖
+# ⛏️ SmartMiner - Autonomous Crypto Mining Farm
 
-![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![XMrig](https://img.shields.io/badge/Miner-XMrig-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 
-## 🔬 Kluczowe Aspekty Techniczne (Dlaczego ten projekt jest ważny?)
+SmartMiner is a fully automated, containerized cryptocurrency mining system designed for CPU mining (RandomX). It doesn't just mine; it thinks.
 
-### 1. Niskopoziomowa Optymalizacja Sprzętowa (Low-Level Tuning)
-System omija standardową izolację kontenerów, aby uzyskać bezpośredni dostęp do rejestrów procesora (**MSR - Model Specific Registers**).
-* **Wyzwanie:** Domyślna konfiguracja Dockera blokuje dostęp do liczników sprzętowych i prefetcherów.
-* **Rozwiązanie:** Implementacja orkiestracji w trybie `privileged`, umożliwiająca manipulację **Hardware Prefetchers** oraz obsługę **Huge Pages (1GB)** wewnątrz wirtualizacji.
-* **Wynik:** Wzrost wydajności o 15% na procesorze Ryzen 9 5950X w porównaniu do standardowego środowiska Docker.
+The system scrapes real-time network data, calculates profitability based on your hardware, and automatically switches your workers to the most profitable coin (e.g., Monero, Zephyr, Etica) using Docker-in-Docker orchestration.
 
-### 2. Stealth Data Acquisition (Scraping)
-Dane rynkowe są pobierane z zabezpieczonych punktów końcowych (Cloudflare) przy użyciu autorskiej implementacji **Selenium Stealth**. System wykorzystuje heurystykę headless browser, symulując zachowanie człowieka, co zapewnia ciągłość dostępu do danych.
+## ✨ Features
 
-### 3. Hot-Swap Kontenerów (Zero-Downtime)
-Manager implementuje logikę "Hot-Swap". Podczas zmiany algorytmu obliczeniowego (np. z RandomX na GhostRider), system przygotowuje nowe środowisko przed zamknięciem starego, minimalizując czas bezczynności procesora (idle time).
+- 🧠 **Intelligent Manager**: Continuously analyzes network hashrate, difficulty, and coin emission to maximize USD daily profit
+- 📊 **Live Dashboard**: Beautiful Streamlit interface to monitor hashrate, system temps, and financial metrics in real-time
+- 🐳 **Dockerized Workers**: Ephemeral XMRig containers that are created and destroyed dynamically
+- 🌡️ **Hardware Monitoring**: Reads CPU temperatures and system uptime via a custom API wrapper
+- ⚡ **Optimized**: Supports HugePages and MSR registers for maximum hash output
+- 🔄 **Auto-Switching**: Automatically switches to the most profitable coin based on real-time data
 
----
+## 🏗️ Project Structure
 
-> ⚠️ **HW OPTIMIZATION NOTICE:** > Domyślna konfiguracja (`config.json`) oraz parametry startowe kontenera są zoptymalizowane pod procesor **AMD Ryzen 9 5950X** (16C/32T, 64MB L3 Cache).
-> * Włączone Huge Pages (1GB).
-> * MSR Registers Mod włączony.
-> * Specyficzne mapowanie wątków RandomX.
-> * *Uruchamiając na innym CPU, zaleca się dostosowanie `json/config.json`.*
-
----
-
-## 🚀 Główne Funkcje
-
-* **📈 Analiza Rynku Live:** Bot (Python + Selenium) cyklicznie skanuje MiningPoolStats, pobierając hashrate sieci, emisję, cenę i trudność.
-* **🧠 Inteligentny Wybór:** Automatycznie oblicza opłacalność (USD/dzień) dla zdefiniowanych coinów (Monero, Zephyr, Dagger, etc.) i wybiera zwycięzcę.
-* **🐳 Docker Orchestration:** Manager automatycznie zabija stary kontener koparki i stawia nowy z odpowiednim algorytmem, bez przerywania działania systemu hosta.
-* **ghost-mode:** Zaawansowana konfiguracja Selenium (`undetected-chromedriver` / `selenium-stealth`) omija zabezpieczenia Cloudflare.
-* **⚡ Hardware Tuning:** Kontenery działają w trybie uprzywilejowanym (`privileged`), co pozwala na pełną akcelerację sprzętową (MSR, HugePages) wewnątrz wirtualizacji.
-
----
-
-## 🛠️ Struktura Projektu
-
-```text
-SmartMiner/
-├── docker-compose.yml       # Orkiestrator całego klastra
-├── manager/                 # Mózg operacji (Python)
-│   ├── main.py              # Główna pętla decyzyjna i sterowanie Dockerem
-│   ├── jsTrigger.py         # Moduł Stealth Web Scraping (Selenium)
-│   ├── soupManger.py        # Parser danych HTML (BeautifulSoup)
-│   └── Dockerfile           # Środowisko managera
-├── worker/                  # Ramię robocze (XMrig)
-│   └── Dockerfile           # Kompilacja XMriga ze źródeł
-└── json/                    # Konfiguracja dynamiczna (montowana jako Volume)
-    ├── config.json          # Bazowa konfiguracja XMriga (Ryzen 5950X tuned)
-    ├── wallets.json         # Twoje adresy portfeli
-    └── pools.json           # Adresy pooli wydobywczych
 ```
----
+SmartMiner/
+├── manager/          # The "Brain" - Scrapes data, decides strategy, controls Docker
+├── worker/           # The "Muscle" - Optimized XMRig image build context
+├── dashboard/        # The "Eyes" - Web UI for monitoring and control
+├── json/             # Configuration files
+│   ├── config.json   # Main configuration
+│   ├── wallets.json  # Wallet addresses
+│   └── pools.json    # Mining pool configurations
+└── docker-compose.yml # Docker Compose configuration
+```
 
-## Instalacja i Uruchomienie
+## Quick Start
 
-### Wymagania
-* Linux (zalecane Ubuntu/Debian)
-* Docker & Docker Compose V2
-* Procesor z obsługą instrukcji AES
+### Prerequisites
 
-### 1. Klonowanie repozytorium
-git clone https://github.com/Bagguet/SmartMiner.git
-cd SmartMiner
+- **OS**: Linux (Ubuntu/Debian recommended) with kernel 4.0+
+- **Docker**: Engine 20.10.0+ and Docker Compose plugin
+- **Hardware**: CPU with AES-NI support, 4GB+ RAM (8GB+ recommended)
+- **Recommended**: HugePages enabled on the host system
 
-### 2. Konfiguracja Portfeli
-Projekt zawiera przykładowy plik portfeli. Musisz go uzupełnić swoimi danymi.
+### Installation
 
-cp json/wallets.example.json json/wallets.json
-nano json/wallets.json
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/SmartMiner.git
+   cd SmartMiner
+   ```
 
-*Upewnij się, że klucze w pliku wallets.json odpowiadają nazwom coinów na MiningPoolStats (np. "Monero", "Zephyr").*
+2. **Configure your settings**
+   ```bash
+   cp json/wallets.example.json json/wallets.json
+   cp manager/links.example.txt manager/links.txt
+   # Edit these files with your wallet addresses and preferred pools
+   ```
 
-### 3. Uruchomienie (Auto-Build)
-Najprostszy sposób. Docker Compose automatycznie zbuduje obrazy.
+3. **Start the stack**
+   ```bash
+   docker compose up -d
+   ```
 
-docker compose up --build -d
+4. **Access the dashboard**
+   ```
+   http://192.168.x.xx:8501
+   ```
 
-### 4. Podgląd Logów
+## 🛠️ Management
 
-# Logi Managera (Decyzje finansowe)
+### Viewing Logs
+
+```bash
+# View manager logs
 docker compose logs -f manager
 
-# Logi Workera (Hashrate i Shares)
-docker logs -f active_miner_worker
+# View dashboard logs
+docker compose logs -f dashboard
+```
 
----
+### Stopping the Miner
 
-## Bezpieczne Zatrzymywanie
-Ponieważ Worker jest uruchamiany dynamicznie przez skrypt Pythona (poza docker-compose), standardowe "down" może nie wystarczyć.
-
-1. Zatrzymaj Managera:
+```bash
 docker compose down
+```
 
-2. Zabij proces koparki (jeśli nadal działa w tle):
-docker rm -f active_miner_worker
+## 🔒 Security Notes
 
----
+- The Manager runs in privileged mode with access to the Docker socket. Only run this on trusted networks.
+- Wallet configuration files are automatically added to `.gitignore` but always double-check before committing.
+- Consider using a dedicated system user with limited permissions for running the containers.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 🙏 Acknowledgments
+
+- XMRig for the mining software
+- Streamlit for the dashboard framework
+- MiningPoolStats for pool data

@@ -1,8 +1,8 @@
-docker
-requests
-beautifulsoup4
-lxml
-selenium
-webdriver-manager
-fake-useragent
-selenium-stealth
+docker==7.0.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==5.0.1
+selenium==4.16.0
+webdriver-manager==4.0.1
+fake-useragent==1.4.0
+selenium-stealth==1.0.6

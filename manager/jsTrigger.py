@@ -84,10 +84,10 @@ def get_rendered_html(url, timeout=45):
         driver.set_page_load_timeout(timeout)
         driver.get(url)
         
-        # Obsługa Cookies
+        # Handle Cookies
         handle_cookie_consent(driver)
 
-        # Czekanie na dane
+        # Wait for data
         try:
             WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located((By.ID, "nethash"))

@@ -2,7 +2,7 @@ services:
   manager:
     build: ./manager
     image: smartminer_manager_img:latest
-    container_name: smartminer_manager
+    container_name: smartminer_manager_node2
     restart: unless-stopped
     privileged: true
     network_mode: "host"
@@ -18,34 +18,8 @@ services:
     depends_on:
       worker_builder:
         condition: service_completed_successfully
-    cpus: '1'
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "3"
 
   worker_builder:
     build: ./worker
     image: smartminer_worker_img
     entrypoint: ["/bin/true"]
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "3"
-
-  dashboard:
-    build: ./dashboard
-    container_name: smartminer_dashboard
-    restart: unless-stopped
-    cpus: '0.5'
-    volumes:
-      - ./json:/app/json
-      - /sys:/sys:ro
-    # Very important - extra_hosts
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "8501:8501"
-    

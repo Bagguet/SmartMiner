@@ -1,16 +1,16 @@
 {
     "api": {
         "id": null,
-        "worker-id": null
+        "worker-id": "miner0"
     },
     "http": {
-        "enabled": false,
-        "host": "127.0.0.1",
-        "port": 0,
+        "enabled": true,
+        "host": "0.0.0.0",
+        "port": 3000,
         "access-token": null,
         "restricted": true
     },
-    "autosave": true,
+    "autosave": false,
     "background": false,
     "colors": true,
     "title": true,
@@ -37,24 +37,7 @@
         "argon2-impl": null,
         "astrobwt-max-size": 550,
         "astrobwt-avx2": false,
-        "argon2": [0, 1, 2, 3],
-        "astrobwt": [0, 1, 2, 3],
-        "cn": [
-            [1, 0]
-        ],
-        "cn-heavy": [
-            [1, 0]
-        ],
-        "cn-lite": [
-            [1, 0]
-        ],
-        "cn-pico": [
-            [2, 0]
-        ],
-        "rx": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-        "rx/wow": [0, 2, 4, 6, 8, 10, 12, 14],
-        "cn/0": false,
-        "cn-lite/0": false
+        "rx/wow": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
     },
     "opencl": {
         "enabled": false,
