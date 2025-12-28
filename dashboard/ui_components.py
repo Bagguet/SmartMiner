@@ -4,7 +4,10 @@ import pandas as pd
 def render_kpi_section(manager_data, miners_data):
     """Renders aggregate KPIs for the entire farm."""
     # 1. Calculate aggregate statistics
-    total_hashrate = sum(float(m['hashrate']) for m in miners_data)
+    try:
+        total_hashrate = sum(float(m['hashrate']) for m in miners_data)
+    except:
+        total_hashrate = 0
     active_workers = sum(1 for m in miners_data if m['online'])
     total_workers = len(miners_data)
 

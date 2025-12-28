@@ -77,14 +77,17 @@ def manage_worker(best_coin, coins):
             network_mode="host",
             restart_policy={"Name": "unless-stopped"},
             volumes={
-                f'{config.HOST_JSON_PATH}/config.json': {'bind': '/config.json', 'mode': 'ro'},
-                '/sys': {'bind': '/sys', 'mode': 'ro'}
+                f'{config.HOST_JSON_PATH}/config.json': {'bind': '/config.json', 'mode': 'ro'}
             },
             log_config=LogConfig(
-                type='json-file', 
-                config={'max-size': '1m', 'max-file': '2'}
-            )
+            type='json-file',
+            config={
+                'max-size': '3m',
+                'max-file': '3'
+            }
         )
+        )
+
         log(f"[SUCCESS] Worker {new_coin_name} has started.")
         save_dashboard_status(new_coin_name, pool, new_coin_income)
 

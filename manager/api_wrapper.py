@@ -73,7 +73,6 @@ class ProxyHandler(BaseHTTPRequestHandler):
 def run_server():
     server_address = ('0.0.0.0', MY_PORT)
     httpd = HTTPServer(server_address, ProxyHandler)
-    print(f"[API WRAPPER] Starting on port {MY_PORT}...")
     httpd.serve_forever()
 
 if __name__ == "__main__":

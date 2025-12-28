@@ -1,8 +1,8 @@
 services:
   manager:
-    build: ./manager
-    image: smartminer_manager_img:latest
-    container_name: smartminer_manager_node2
+    build: 
+      context: ./manager
+    container_name: smartminer_manager
     restart: unless-stopped
     privileged: true
     network_mode: "host"
@@ -14,12 +14,21 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./json:/app/json
-      - /sys:/sys:ro
+      - ./manager/links.txt:/app/links.txt
+    cpus: '2'
     depends_on:
       worker_builder:
         condition: service_completed_successfully
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "3"
+
 
   worker_builder:
-    build: ./worker
+    build: 
+      context: ./worker
     image: smartminer_worker_img
+    container_name: builder_helper
     entrypoint: ["/bin/true"]

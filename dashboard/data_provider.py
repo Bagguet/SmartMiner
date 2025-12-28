@@ -46,7 +46,10 @@ def get_all_miners_stats():
                 # shares
                 if 'results' in data:
                     status_data["shares_good"] = data['results'].get('shares_good', 0)
-                    status_data["shares_bad"] = int(data['results'].get('shares_total', 0)) - int(status_data["shares_good"])
+                    try:
+                        status_data["shares_bad"] = int(data['results'].get('shares_total', 0)) - int(status_data["shares_good"])
+                    except:
+                        status_data["shares_bad"] = 0
                 # CPU temperature
                 if 'sensors' in data and 'cpu_temp' in data['sensors']:
                     status_data["remote_temp"] = data['sensors']['cpu_temp']
@@ -57,20 +60,3 @@ def get_all_miners_stats():
         results.append(status_data)
         
     return results
-"""
-def get_cpu_temp_direct():
-    try:
-        files = glob.glob(config.CPU_TEMP_GLOB)
-        temps = []
-        for file in files:
-            try:
-                with open(file, 'r') as f:
-                    val = int(f.read().strip())
-                    if val > 0: temps.append(val)
-            except: pass
-        if temps:
-            max_temp = max(temps)
-            return max_temp / 1000.0 if max_temp > 1000 else max_temp
-    except: pass
-    return None
-"""
