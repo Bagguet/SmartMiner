@@ -1,32 +1,38 @@
 import json
-import glob
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+import psutil
 
 # Configuration
 XMRIG_HOST = "127.0.0.1"
 XMRIG_PORT = 3000
 MY_PORT = 4000  # Port for serving the "enhanced" JSON
 
-def get_cpu_temp():
-    """Reads temperature from the system (same as in the dashboard)."""
-    try:
-        files = glob.glob('/sys/class/hwmon/hwmon*/temp*_input')
-        temps = []
-        for file in files:
-            try:
-                with open(file, 'r') as f:
-                    val = int(f.read().strip())
-                    if val > 0: temps.append(val)
-            except: pass
-        
-        if temps:
-            max_temp = max(temps)
-            return max_temp / 1000.0 if max_temp > 1000 else max_temp
-    except Exception as e:
-        print(f"Temperature read error: {e}")
-    return 0
+def get_temps():
+    temps = psutil.sensors_temperatures()
+    VRM_temp = 0
+    CPU_temp = 0
+    # CPU temperature
+    if 'k10temp' in temps:
+        Tccd1 = 0
+        Tccd2 = 0
+        for entry in temps['k10temp']:
+            if entry.label == "Tccd1":
+                Tccd1 = float(entry.current)
+            elif entry.label == "Tccd2":
+                Tccd2 = float(entry.current)
+        try: 
+            CPU_temp = max(Tccd1,Tccd2)
+        except:
+            CPU_temp = 0
+
+    # VRM temperature
+    if 'nct6687' in temps:
+        for entry in temps['nct6687']:
+            if entry.label == "Thermistor 15":
+                VRM_temp = entry.current
+    return CPU_temp, VRM_temp
+
 
 def get_system_uptime():
     """Reads the host (system) uptime in seconds."""
@@ -55,12 +61,13 @@ class ProxyHandler(BaseHTTPRequestHandler):
         except:
             final_data = {"error": "XMRig offline"}
 
-        temp = get_cpu_temp()
+        CPU_temp, VRM_temp = get_temps()
 
         final_data['sensors'] = {
-            'cpu_temp': temp,
+            'cpu_temp': CPU_temp,
+            'vrm_temp': VRM_temp,
         }
-        
+
         final_data['host'] = {
             'uptime': get_system_uptime()
         }

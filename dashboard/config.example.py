@@ -1,6 +1,3 @@
-LOG_FILE_TEMP = "temperature_log.txt"
-LOG_FILE_HASH = "hashrate_log.txt"
-
 STATUS_JSON_PATH = '/app/json/status.json'
 CPU_TEMP_GLOB = '/sys/class/hwmon/hwmon*/temp*_input'
 

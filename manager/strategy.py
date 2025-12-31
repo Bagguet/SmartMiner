@@ -2,7 +2,7 @@ import json
 import config
 import soupManager as Sm
 import jsTrigger
-from utils import log
+from utils import log, save_order_for_slaves
 
 def get_best_coin_logic():
     """Analyzes the market and selects the most profitable coin."""
@@ -66,6 +66,6 @@ def get_best_coin_logic():
     # Sort by income in descending order
     coins = sorted(coins, key=lambda x: x.get("Income per day in usd", 0), reverse=True)
     best_one = coins[0]
-    
+    save_order_for_slaves(best_one["Key"], best_one['Pool'], best_one["Wallet"])
     log(f"[INFO] ==> BEST OPTION: {best_one['Key']} (${best_one.get('Income per day in usd', 0):.2f}/day)")
     return best_one, coins

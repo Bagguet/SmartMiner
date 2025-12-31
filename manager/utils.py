@@ -22,3 +22,19 @@ def save_dashboard_status(coin, pool, profit):
             json.dump(data, f, indent=4)
     except Exception as e:
         log(f"[WARN] Failed to save dashboard status: {e}", force=True)
+
+def save_order_for_slaves(coin, pool, wallet):
+    try:
+        data = {
+            "coin": coin,
+            "pool": pool,
+            "wallet": wallet,
+        }
+
+        path = os.path.join(config.HOST_JSON_PATH, 'order.json')
+        
+        with open(path, 'w') as f:
+            json.dump(data, f, indent=4)
+            
+    except Exception as e:
+        print(f"[ERROR] Nie udało się zapisać order.json: {e}")

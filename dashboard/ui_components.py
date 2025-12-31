@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 
+
 def render_kpi_section(manager_data, miners_data):
     """Renders aggregate KPIs for the entire farm."""
     # 1. Calculate aggregate statistics
@@ -42,6 +43,12 @@ def format_time(seconds):
     else:
         return f"{minutes}m"
 
+def format_minutes(seconds):
+    minutes = seconds / 60
+    return minutes
+    
+
+
 def render_workers_list(miners_data):
     """Renders a detailed list of workers."""
     st.subheader(f"⚙️ Workers Status ({len(miners_data)})")
@@ -71,17 +78,27 @@ def render_workers_list(miners_data):
                     total_s = miner['shares_good'] + miner['shares_bad']
                     if total_s > 0:
                         acc_rate = (miner['shares_good'] / total_s) * 100
-                    col4.metric("Shares", f"{miner['shares_good']}", delta=f"{acc_rate:.1f}% Acc")
-                    
-                    # Uptime and CPU temperature
+                    col4.metric("Shares", f"{miner['shares_good']} ", delta=f"{acc_rate:.1f}% Acc")
+                    try:
+                        col4.caption(f"{(miner['shares_good']/format_minutes(miner.get('uptime', 0))):.2f}/minute")
+                    except:
+                        pass
+
+                    # Uptime and temperatures
                     sys_uptime_val = miner.get('sys_uptime', 0)
                     sys_uptime_str = format_time(sys_uptime_val)
 
                     miner_uptime = format_time(miner.get('uptime', 0))
                     temp_display = "N/A"
-                    if 'remote_temp' in miner:
-                        temp_display = f"{miner['remote_temp']:.1f} °C"
-                    col5.write(f"🌡️ **{temp_display}**")
+                    vrm_display = "N/A"
+                    if 'sensors' in miner['raw_data']:
+                        c_temp = miner['raw_data']['sensors'].get('cpu_temp', 0)
+                        v_temp = miner['raw_data']['sensors'].get('vrm_temp', 0)
+                        
+                        temp_display = f"CPU: {c_temp:.1f} °C" if c_temp > 0 else "CPU: N/A"
+                        if v_temp > 0:
+                            vrm_display = f" | VRM: {v_temp:.1f} °C"
+                    col5.write(f"🌡️ **{temp_display}{vrm_display}**")
                     col5.caption(f"Miner: {miner_uptime} | Sys: {sys_uptime_str}")
                     
                     # SSH command
@@ -92,6 +109,8 @@ def render_workers_list(miners_data):
                     link = f"ssh://{ssh_user}@{ip}"
                     col6.markdown(f"[🚀 Connect]({link})")
                     col6.code(ssh_cmd, language="bash")
+
+
                 else:
                     col3.write("---")
                     col4.write("Connection Failed")

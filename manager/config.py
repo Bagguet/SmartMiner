@@ -7,10 +7,13 @@ PATH_WALLETS = 'json/wallets.json'
 PATH_POOLS = 'json/pools.json'
 PATH_LINKS = 'links.txt'
 PIPE_PATH = "/tmp/miner_comm"
+
 MINER_THREADS = 1
 MY_HASHRATE_KH = 17.3
 INCOME_TRESHOLD = 1.05
 HOURS_INTERVAL = 8
+
+HOST_JSON_PATH = os.getenv('HOST_JSON_PATH', os.path.join(os.getcwd(), "json"))
 
 class State:
     miner_paused = False
@@ -19,4 +22,3 @@ class State:
 
 state = State()
 
-HOST_JSON_PATH = os.getenv('HOST_JSON_PATH', os.path.join(os.getcwd(), "json"))

@@ -2,7 +2,7 @@ services:
   manager:
     build: 
       context: ./manager
-    container_name: smartminer_manager
+    container_name: smartminer_manager_master
     restart: unless-stopped
     privileged: true
     network_mode: "host"
@@ -13,8 +13,9 @@ services:
       - HOST_JSON_PATH=${PWD}/json
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./json:/app/json
-      - ./manager/links.txt:/app/links.txt
+      - ${PWD}/json:/app/json
+      - ${PWD}/manager/links.txt:/app/links.txt
+      - /sys:/sys:ro
     cpus: '2'
     depends_on:
       worker_builder:
@@ -39,7 +40,7 @@ services:
     restart: unless-stopped
     cpus: '0.5'
     volumes:
-      - ./json:/app/json
+      - ${PWD}/json:/app/json
       - /sys:/sys:ro
     # Very important - extra_hosts
     extra_hosts:
@@ -51,3 +52,14 @@ services:
       options:
         max-size: "1m"
         max-file: "3"
+    
+  order_server:
+    image: python:3.10-slim
+    container_name: smartminer_order_server
+    command: python -m http.server 8080
+    working_dir: /data
+    volumes:
+      - ${PWD}/json:/data  
+    ports:
+      - "8080:8080"  
+    restart: unless-stopped
