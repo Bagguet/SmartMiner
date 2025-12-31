@@ -18,4 +18,6 @@ manager/lastCoin.txt
 smartminer_images.tar
 
 json/status.json
+json/order.json
 dashboard/config.py
+
