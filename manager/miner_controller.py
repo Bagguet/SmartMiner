@@ -33,8 +33,9 @@ def manage_worker(best_coin, coins):
     new_coin_name = best_coin['Key']
     wallet = best_coin['Wallet']
     pool = best_coin['Pool']
-    new_coin_income = best_coin.get('Income per day in usd', 0)
-
+    new_coin_income_usd = best_coin.get('Income per day in usd', 0)
+    new_coin_income = best_coin.get("Income per day",0)
+    new_coin_symbol = best_coin.get("Symbol",0)
     try:
         container = CLIENT.containers.get(config.CONTAINER_NAME)
         if container.status == 'running':
@@ -44,13 +45,13 @@ def manage_worker(best_coin, coins):
                 log(f"[DOCKER] {new_coin_name} is already running. Stable.")
                 return
 
-            old_coin_income = 0
+            old_coin_income_usd = 0
             for c in coins:
                 if c.get("Key") == old_coin_name:
-                    old_coin_income = c.get('Income per day in usd', 0) * config.INCOME_TRESHOLD
+                    old_coin_income_usd = c.get('Income per day in usd', 0) * config.INCOME_TRESHOLD
                     break
 
-            if old_coin_income >= new_coin_income:
+            if old_coin_income_usd >= new_coin_income_usd:
                 log(f"[INFO] Staying with {old_coin_name}. Profit increase too small (<{int((config.INCOME_TRESHOLD-1)*100)}%).")
                 return
 
@@ -89,7 +90,7 @@ def manage_worker(best_coin, coins):
         )
 
         log(f"[SUCCESS] Worker {new_coin_name} has started.")
-        save_dashboard_status(new_coin_name, pool, new_coin_income)
+        save_dashboard_status(new_coin_name, pool, new_coin_income_usd,new_coin_income, new_coin_symbol)
 
     except Exception as e:
         log(f"[CRITICAL] Container startup error: {e}", force=True)
