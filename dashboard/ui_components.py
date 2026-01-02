@@ -27,7 +27,7 @@ def render_kpi_section(manager_data, miners_data):
     # KPI 3: Estimated Profit (from manager)
     profit_usd = f"${manager_data.get('profit_usd', 0)*total_hashrate:.2f} / day" if manager_data else "$0.00"
     kpi3.metric("Est. Farm Profit", profit_usd)
-    profit_caption = f"{manager_data.get('profit_coin', 0)*total_hashrate:.4f} {manager_data.get('symbol', "?")} / day"
+    profit_caption = f"{manager_data.get('profit_coin', 0)*total_hashrate:.4f} {manager_data.get('symbol', '?')} / day"
     kpi3.caption(profit_caption)
     
     return total_hashrate
