@@ -7,7 +7,14 @@ from utils import log
 
 load_dotenv()
 TOKEN = os.getenv('DC_API_KEY')
-DC_USER_ID = int(os.getenv('DC_USER_ID'))
+DC_USER_ID_str = os.getenv('DC_USER_ID')
+
+if not TOKEN:
+    raise ValueError("DC_API_KEY environment variable is not set")
+if not DC_USER_ID_str:
+    raise ValueError("DC_USER_ID environment variable is not set")
+
+DC_USER_ID = int(DC_USER_ID_str)
 
 # Setup Bot
 intents = discord.Intents.default()
