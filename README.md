@@ -279,15 +279,6 @@ We welcome contributions to improve SmartMiner!
 3. **Make changes** and test thoroughly
 4. **Submit pull request** with detailed description
 
-### Areas for Enhancement
-
-- **Additional Coins**: Support for more RandomX-based cryptocurrencies
-- **GPU Mining**: Extend support for GPU mining algorithms
-- **Mobile App**: React Native or Flutter mobile interface
-- **Database Integration**: Historical data storage and trend analysis
-- **Alert System**: Email/webhook notifications for worker issues
-- **Multi-User**: Authentication and role-based access control
-
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
