@@ -2,6 +2,7 @@ import threading
 import asyncio
 import discord
 import os
+import logging
 from dotenv import load_dotenv
 from utils import log
 
@@ -15,6 +16,8 @@ if not DC_USER_ID_str:
     raise ValueError("DC_USER_ID environment variable is not set")
 
 DC_USER_ID = int(DC_USER_ID_str)
+
+logging.getLogger('discord').setLevel(logging.WARNING)
 
 # Setup Bot
 intents = discord.Intents.default()
@@ -41,5 +44,5 @@ async def on_ready():
     log(f'[INFO] Discord Bot logged in as {bot.user}')
 
 def start_discord_bot():
-    thread = threading.Thread(target=bot.run, args=(TOKEN,), daemon=True)
+    thread = threading.Thread(target=bot.run, args=(TOKEN,), kwargs={'log_handler': None}, daemon=True)
     thread.start()
