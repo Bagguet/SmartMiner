@@ -71,7 +71,7 @@ def manage_worker(best_coin, coins):
     
     if notification_msg:
         send_dm(notification_msg)
-        save_order_for_slaves(new_coin_name, wallet, pool)
+        save_order_for_slaves(new_coin_name, pool, wallet)
     
     log(f"[DOCKER] Starting XMrig: {new_coin_name} @ {pool}")
     
