@@ -1,30 +1,39 @@
 # 🧠 SmartMiner Manager
 
-> The autonomous "brain" of the SmartMiner ecosystem, responsible for real-time market analysis, profit optimization, and containerized mining operations.
+The autonomous "brain" of the SmartMiner ecosystem, responsible for real-time market analysis, profit optimization, and containerized mining operations. This service continuously monitors mining profitability and automatically switches between coins to maximize returns.
 
 ---
 
 ## 🚀 Key Features
 
 ### 🔄 Autonomous Profit Switching
-- Real-time analysis of network hashrate, difficulty, and coin emission
-- Smart switching with configurable profit threshold (default: +5%)
-- Scheduled profitability checks (default: every 8 hours)
+- **Real-time Analysis**: Monitors network hashrate, difficulty, and coin emission rates
+- **Smart Switching**: Configurable profit threshold (default: +5%) prevents unnecessary switches
+- **Scheduled Checks**: Automatic profitability analysis every 8 hours (configurable)
+- **Multi-coin Support**: Analyzes Monero, Dagger, Etica, QuantumRL, Zephyr and more
 
 ### 🐳 Container Orchestration
-- Dynamic Docker container management for XMRig instances
-- Automatic configuration based on optimal mining strategy
-- Resource monitoring and optimization
+- **Dynamic Docker Management**: Automatic XMRig container lifecycle management
+- **Resource Optimization**: Configurable thread allocation and resource monitoring
+- **Error Recovery**: Automatic restart and failure handling
+- **Clean Switching**: Seamless transitions between mining coins
 
-### 🌐 Web Scraping Engine
-- Headless Chromium with Selenium for dynamic content
-- Custom parsers for major mining pools
-- Fallback mechanisms for failed scrapes
+### 🌐 Advanced Web Scraping Engine
+- **Headless Chromium**: Selenium-based JavaScript rendering for dynamic content
+- **Anti-Bot Evasion**: Stealth techniques with user agent spoofing
+- **Concurrent Processing**: Multi-threaded scraping for faster data collection
+- **Fallback Mechanisms**: Error handling and retry logic for failed requests
+
+### Discord Notifications
+- **Real-time Alerts**: Instant notifications for miner events
+- **Setup Notifications**: Automatic alerts for first-time configuration
+- **Thread-Safe**: Async communication with error handling and retry logic
 
 ### 🔌 Unified API (Port 4000)
-- Combines XMRig statistics with host system metrics
-- Real-time monitoring of CPU temperature, uptime, and performance
-- Dashboard-compatible JSON responses
+- **Enhanced Monitoring**: Combines XMRig statistics with host system metrics
+- **Temperature Sensing**: Real-time CPU and VRM temperature monitoring
+- **System Metrics**: Host uptime, performance data, and miner statistics
+- **Dashboard Integration**: JSON responses optimized for dashboard consumption
 
 ## 🛠️ Architecture
 
@@ -32,90 +41,279 @@
 
 | Component | Key Files | Responsibilities |
 |-----------|-----------|------------------|
-| **Main Loop** | `main.py` | • Orchestrates mining strategy<br>• Manages worker lifecycle<br>• Handles command interface |
-| **Strategy Engine** | `strategy.py` | • Profitability calculations<br>• Market data analysis<br>• Decision making logic |
-| **Container Manager** | `miner_controller.py` | • Docker container lifecycle<br>• Resource allocation<br>• Error handling and recovery |
-| **Web Scraping** | `soupManager.py`, `jsTrigger.py` | • Dynamic content extraction<br>• Anti-bot evasion<br>• Data normalization |
+| **Main Loop** | `main.py` | • Orchestrates mining strategy<br>• Manages worker lifecycle<br>• Handles command interface<br>• Coordinates all services |
+| **Strategy Engine** | `strategy.py` | • Profitability calculations<br>• Market data analysis<br>• Decision making logic<br>• Coin ranking and selection |
+| **Container Manager** | `miner_controller.py` | • Docker container lifecycle<br>• Resource allocation<br>• Error handling and recovery<br>• Profit threshold validation |
+| **Discord Service** | `discord_service.py` | • Bot authentication and messaging<br>• Real-time notifications<br>• Thread-safe communication<br>• Error handling |
+| **Web Scraping** | `soupManager.py`, `jsTrigger.py` | • Dynamic content extraction<br>• Anti-bot evasion<br>• Data normalization<br>• Concurrent processing |
+| **API Wrapper** | `api_wrapper.py` | • HTTP server on port 4000<br>• System sensor integration<br>• XMRig proxy functionality<br>• Dashboard data aggregation |
+| **Command Interface** | `commands.py` | • Named pipe communication<br>• Real-time command processing<br>• State management<br>• Logging integration |
+| **Utilities** | `utils.py` | • Logging system<br>• Dashboard status updates<br>• JSON file management<br>• Helper functions |
+
+### Data Flow Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Web Sources   │───▶│   jsTrigger.py   │───▶│  soupManager.py │
+│(MiningPoolStats)│    │ (Selenium)       │    │ (BeautifulSoup) │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                                        │
+┌─────────────────┐    ┌──────────────────┐             ▼
+│ Discord Bot     │◀───│discord_service.py│    ┌─────────────────┐
+│ (Notifications) │    │(Async Messaging) │    │  strategy.py    │
+└─────────────────┘    └──────────────────┘    │ (Profit Engine) │
+                                               └─────────────────┘
+                                                        │
+┌─────────────────┐    ┌──────────────────┐             ▼
+│ Command Pipe    │◀───│   commands.py    │    ┌─────────────────┐
+│(/tmp/miner_comm)│    │ (Named Pipe)     │    │   main.py       │
+└─────────────────┘    └──────────────────┘    │ (Orchestrator)  │
+                                               └─────────────────┘
+                                                        │
+┌─────────────────┐    ┌──────────────────┐             ▼
+│ Dashboard (8501)│◀───│  api_wrapper.py  │    ┌─────────────────┐
+│ (Monitoring)    │    │ (Port 4000)      │    │miner_controller │
+└─────────────────┘    └──────────────────┘    │ (Docker Mgmt)   │
+                                               └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │ XMRig Container │
+                                               │ (Mining Worker) │
+                                               └─────────────────┘
+```
 
 ## 📂 Configuration
 
-The Manager requires specific JSON files to function. Ensure these exist in the json/ directory.
+The Manager requires specific configuration files to function properly. All files should be placed in the `json/` directory unless otherwise specified.
 
-1. Wallets (json/wallets.json)
+### 1. Wallet Configuration (`json/wallets.json`)
 
-Map coin names (keys) to your wallet addresses. ⚠️ Security: Add this file to .gitignore. Do not commit your real addresses.
+Map coin symbols to your wallet addresses:
 
-2. Pools (json/pools.json)
+```json
+{
+  "Monero": "your_monero_wallet_address",
+  "Dagger": "your_dagger_wallet_address",
+  "Etica": "your_etica_wallet_address",
+  "QuantumRL": "your_quantumrl_wallet_address",
+  "Zephyr": "your_zephyr_wallet_address"
+}
+```
 
-Map coin names to your preferred mining pools (host:port).
+⚠️ **Security**: Add this file to `.gitignore`. Never commit your real wallet addresses.
 
-3. Links (links.txt)
+### 2. Mining Links (`links.txt`)
 
-A plain text file containing URLs to mining pool dashboards or explorer pages that the scraper should analyze.
+Plain text file containing URLs to mining pool dashboards for scraping:
 
-4. System Settings
+```
+https://miningpoolstats.stream/monero
+https://miningpoolstats.stream/dagger
+https://miningpoolstats.stream/etica_eti
+https://miningpoolstats.stream/quantumrl
+https://miningpoolstats.stream/zephyr
+```
 
-### ⚡ Configuration Options
+### 3. Discord Integration (`.env`)
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `HOURS_INTERVAL` | int | `8` | Profitability check interval (hours) |
-| `INCOME_THRESHOLD` | float | `1.05` | Minimum profit increase to switch (5%) |
-| `MY_HASHRATE_KH` | int | `1000` | Your hardware's hashrate in kH/s |
+Create a `.env` file with your Discord credentials:
+
+```bash
+DC_API_KEY=your_discord_bot_token_here
+DC_USER_ID=your_discord_user_id_here
+```
+
+### 4. System Settings (`config.py`)
+
+Core configuration parameters:
+
+```python
+# Mining Configuration
+CONTAINER_NAME = "active_miner_worker"          # Docker container name
+IMAGE_NAME = "smartminer_worker_img:latest"      # Docker image name
+MINER_THREADS = 1                                # XMRig thread count
+
+# Performance Settings
+MY_HASHRATE_KH = 17.3                            # Your hashrate in kH/s
+INCOME_TRESHOLD = 1.05                           # Profit increase threshold (5%)
+HOURS_INTERVAL = 8                               # Check interval in hours
+
+# File Paths
+PATH_WALLETS = 'json/wallets.json'              # Wallet configuration
+PATH_POOLS = 'json/pools.json'                   # Pool configuration  
+PATH_LINKS = 'links.txt'                         # Mining links
+PIPE_PATH = "/tmp/miner_comm"                    # Command pipe location
+```
+
+### ⚙️ Advanced Configuration Options
+
+| Setting | Type | Default | Range | Description |
+|---------|------|---------|-------|-------------|
+| `HOURS_INTERVAL` | int | `8` | 1-24 | Profitability check interval (hours) |
+| `INCOME_TRESHOLD` | float | `1.05` | 1.01-2.0 | Minimum profit increase to switch |
+| `MY_HASHRATE_KH` | int | `17.3` | 1-10000 | Your hardware's hashrate in kH/s |
+| `MINER_THREADS` | int | `1` | 1-64 | Number of CPU threads for XMRig |
 
 
 ## 🔌 API Wrapper (Port 4000)
 
-The Manager hosts a specialized HTTP server on Port 4000. Unlike the raw XMRig API (Port 3000), this wrapper injects Host System Data.
+The Manager hosts a specialized HTTP server on Port 4000 that enhances the raw XMRig API (Port 3000) with host system data. This is the primary interface for the Dashboard.
 
-Endpoint: GET /1/summary Response:
+### API Endpoint
 
-The Dashboard relies on this port to show temperatures.
+**GET** `/1/summary`
+
+### Enhanced Response Format
+
+```json
+{
+  // XMRig Statistics (from port 3000)
+  "hashrate": {
+    "total": [17300, "H/s"]
+  },
+  "uptime": 3600,
+  "results": {
+    "shares_good": 150,
+    "shares_total": 152
+  },
+  
+  // Enhanced System Data (added by wrapper)
+  "sensors": {
+    "cpu_temp": 65.5,
+    "vrm_temp": 45.2
+  },
+  "host": {
+    "uptime": 86400
+  }
+}
+```
+
+### Temperature Monitoring
+
+- **CPU Temperature**: Reads from `/sys/class/hwmon/hwmon*/temp*_input`
+- **VRM Temperature**: Monitors motherboard voltage regulator temperatures
+- **Sensor Detection**: Automatically detects available temperature sensors
+- **Error Handling**: Graceful fallback when sensors are unavailable
+
+### System Integration
+
+- **Uptime Tracking**: Host system uptime from `/proc/uptime`
+- **Process Monitoring**: XMRig process statistics
+- **Error Recovery**: Handles XMRig offline scenarios gracefully
 
 ## 🎮 Command Control
 
-Control the manager via named pipe:
+Control the manager in real-time using the named pipe interface:
+
+### Available Commands
 
 ```bash
-# Pause mining
+# Pause mining operations
 echo "miner stop" > /tmp/miner_comm
 
-# Resume mining
+# Resume mining operations  
 echo "miner start" > /tmp/miner_comm
-
-# Check status
-echo "status" > /tmp/miner_comm
 ```
+### Command Processing
 
-> 🔄 Commands are processed asynchronously. Check logs for confirmation.
+- **Asynchronous Processing**: Commands are handled in real-time
+- **State Management**: Commands update the global state immediately
+- **Logging**: All commands are logged with timestamps
+- **Error Handling**: Invalid commands are safely ignored
 
 ## 🐳 Docker Deployment
 
-The Manager requires specific privileges to control sibling containers and access hardware sensors.
+The Manager requires elevated privileges to control sibling containers and access hardware sensors.
 
 ### Prerequisites
-- Docker Engine 20.10.0 or later
-- Docker Compose 2.0.0 or later
-- Access to `/var/run/docker.sock`
-- Read access to `/sys/class/hwmon` for temperature monitoring
+
+- **Docker Engine**: 20.10.0 or later
+- **Docker Compose**: 2.0.0 or later  
+- **Socket Access**: Read/write access to `/var/run/docker.sock`
+- **Hardware Access**: Read access to `/sys/class/hwmon` for temperature monitoring
+
+### Container Privileges
+
+The Manager container runs with elevated privileges:
+
+```yaml
+privileged: true
+volumes:
+  - /var/run/docker.sock:/var/run/docker.sock
+  - ./json:/app/json
+  - /sys/class/hwmon:/sys/class/hwmon:ro
+```
 
 ### Quick Start
+
 ```bash
-docker-compose up -d
+# Build and start all services
+docker-compose up -d --build
+
+# View manager logs
+docker-compose logs -f manager
+
+# Check container status
+docker-compose ps
 ```
+
 ### Required Volumes
-- `/var/run/docker.sock` - For container management
-- `./json` - Configuration and logs directory
-- `/sys/class/hwmon:ro` - Read-only access to hardware sensors
 
-## 🔧 Troubleshooting
+| Volume | Purpose | Access |
+|--------|---------|--------|
+| `/var/run/docker.sock` | Container management | Read/Write |
+| `./json` | Configuration and logs | Read/Write |
+| `/sys/class/hwmon:ro` | Hardware sensors | Read-only |
 
-- Temperature shows "0" or "N/A": Ensure /sys is mounted read-only (ro) in the Docker volume configuration. The API wrapper looks for sensors in /sys/class/hwmon/.
+## 🔧 Development & Debugging
 
-- Worker not starting: Check the Manager logs (docker logs smartminer_manager). Ensure the coin name scraped from the web matches a key in wallets.json and pools.json.
+### Logging System
 
+The Manager uses a centralized logging system:
+
+```python
+# Standard logging
+log("[INFO] Mining operation started")
+
+# Forced logging (bypasses log disable)
+log("[ERROR] Critical failure", force=True)
+```
+
+### Debug Mode
+
+Enable detailed logging by setting `logs_enabled = True` in the state:
+
+```python
+config.state.logs_enabled = True
+```
+
+### Common Debugging Commands
+
+```bash
+# View real-time logs
+docker-compose logs -f manager
+
+# Check container status
+docker exec smartminer_manager python -c "import config; print('Paused:', config.state.miner_paused)"
+
+# Test API endpoint
+curl http://localhost:4000/1/summary
+
+# Send test command
+echo "status" > /tmp/miner_comm
+```
+
+### Error Handling
+
+- **Graceful Degradation**: Services continue operating when individual components fail
+- **Retry Logic**: Automatic retries for network requests and container operations
+- **Fallback Mechanisms**: Alternative data sources when primary sources fail
+- **Comprehensive Logging**: All errors are logged with context and timestamps
 ---
+
 
 <div align="center">
   <p>⚡ Powered by SmartMiner ⛏️</p>
+  <p>Made with ❤️ for the crypto mining community</p>
 </div>

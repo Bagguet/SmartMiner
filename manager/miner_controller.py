@@ -2,7 +2,8 @@ import docker
 import os
 from docker.types import LogConfig
 import config
-from utils import log, save_dashboard_status
+from utils import log, save_dashboard_status, save_order_for_slaves
+from discord_service import send_dm
 
 try:
     CLIENT = docker.from_env()
@@ -36,6 +37,9 @@ def manage_worker(best_coin, coins):
     new_coin_income_usd = best_coin.get('Income per day in usd', 0)
     new_coin_income = best_coin.get("Income per day",0)
     new_coin_symbol = best_coin.get("Symbol",0)
+
+    notification_msg = None
+    
     try:
         container = CLIENT.containers.get(config.CONTAINER_NAME)
         if container.status == 'running':
@@ -58,11 +62,17 @@ def manage_worker(best_coin, coins):
             log(f"[DOCKER] Switching! Stopping {old_coin_name}...")
             container.stop()
             container.remove()
+            notification_msg = f"🔄 Miner changed to **{new_coin_name}**! Now making **${new_coin_income_usd:.2f}/day**"
         else:
             container.remove()
+            notification_msg = f"Miner started with **{new_coin_name}**! Est. **${new_coin_income_usd:.2f}/day**"
     except docker.errors.NotFound:
-        pass
-
+        notification_msg = f"Miner started with **{new_coin_name}**! Est. **${new_coin_income_usd:.2f}/day**"
+    
+    if notification_msg:
+        send_dm(notification_msg)
+        save_order_for_slaves(new_coin_name, wallet, pool)
+    
     log(f"[DOCKER] Starting XMrig: {new_coin_name} @ {pool}")
     
     cmd = f"--config=/config.json --coin \"{new_coin_name}\" -o {pool} -u {wallet} -p x -k --threads={config.MINER_THREADS}"

@@ -7,3 +7,4 @@ webdriver-manager==4.0.1
 fake-useragent==1.4.0
 selenium-stealth==1.0.6
 psutil
+discord==2.3.2
