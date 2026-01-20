@@ -6,9 +6,10 @@ from miner_controller import manage_worker
 from commands import listen_for_commands
 import api_wrapper
 from discord_service import start_discord_bot
+import os
 
 if __name__ == "__main__":
-    log("--- SmartMiner Manager v1.2 Started ---", force=True)
+    log("--- SmartMiner Manager v1.2.1 Started ---", force=True)
     try:
         start_discord_bot()
     except Exception as e:

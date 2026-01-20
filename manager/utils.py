@@ -34,7 +34,7 @@ def save_order_for_slaves(coin, pool, wallet):
             "wallet": wallet,
         }
 
-        path = "/app/json/order.json"
+        path = "/app/order.json"
         
         with open(path, 'w') as f:
             json.dump(data, f, indent=4)

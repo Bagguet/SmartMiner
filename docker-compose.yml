@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: "host"
+    init: true
     environment:
       - CHROME_BIN=/usr/bin/chromium
       - CHROMEDRIVER_PATH=/usr/bin/chromedriver
@@ -59,7 +60,7 @@ services:
     command: python -m http.server 8080
     working_dir: /data
     volumes:
-      - ${PWD}/json:/data  
+      - ${PWD}/json/order.json:/data/order.json  
     ports:
       - "8080:8080"  
     restart: unless-stopped
