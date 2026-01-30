@@ -26,7 +26,7 @@ def save_dashboard_status(coin, pool, profit, profit_coin, symbol):
     except Exception as e:
         log(f"[WARN] Failed to save dashboard status: {e}", force=True)
 
-def save_order_for_slaves(coin, pool, wallet):
+def save_order_for_slaves(coin, pool):
     try:
         data = {
             "coin": coin,
