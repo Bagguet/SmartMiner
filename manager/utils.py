@@ -31,7 +31,6 @@ def save_order_for_slaves(coin, pool, wallet):
         data = {
             "coin": coin,
             "pool": pool,
-            "wallet": wallet,
         }
 
         path = "/app/order.json"

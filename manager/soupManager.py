@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-
+from utils import log
 class SoupManagerCoin:
     def __init__(self,html,hashrate):
         self.myHashrate = hashrate
@@ -70,7 +70,7 @@ class SoupManagerCoin:
                 self.emission = float(self.soup.find(id="stats_supply_emission").text.split()[0])
             self.informations["Emission"] = self.emission
         except:
-                print(f'{self.informations["Coin name"]} no emmision information')
+                log(f'[WARN] {self.informations["Coin name"]} no emmision information')
                 self.emission = 0
         
     def calculateIncomePerDay(self):
@@ -84,7 +84,7 @@ class SoupManagerCoin:
             self.incomePerDay = self.myHashrate/convertedNetHashrate*self.emission*self.totalTax
         except:
             self.incomePerDay = 0 
-            print(f"Error: {self.coinName}")
+            log(f"[Error] {self.coinName} income calculation")
         
         self.incomePerDayInUsd = self.incomePerDay*self.price
         self.informations["Price"] = self.price

@@ -53,10 +53,14 @@ def manage_worker(best_coin, coins):
             for c in coins:
                 if c.get("Key") == old_coin_name:
                     old_coin_income_usd = c.get('Income per day in usd', 0) * config.INCOME_TRESHOLD
+                    old_coin_income = c.get('Income per day', 0)
+                    old_coin_symbol = c.get("Symbol", 0)
+                    save_dashboard_status(old_coin_name, pool, old_coin_income_usd, old_coin_income, old_coin_symbol)
                     break
 
             if old_coin_income_usd >= new_coin_income_usd:
                 log(f"[INFO] Staying with {old_coin_name}. Profit increase too small (<{int((config.INCOME_TRESHOLD-1)*100)}%).")
+                save_order_for_slaves(old_coin_name, pool)
                 return
 
             log(f"[DOCKER] Switching! Stopping {old_coin_name}...")
@@ -71,7 +75,7 @@ def manage_worker(best_coin, coins):
     
     if notification_msg:
         send_dm(notification_msg)
-        save_order_for_slaves(new_coin_name, pool, wallet)
+        save_order_for_slaves(new_coin_name, pool)
     
     log(f"[DOCKER] Starting XMrig: {new_coin_name} @ {pool}")
     
