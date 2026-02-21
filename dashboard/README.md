@@ -1,6 +1,6 @@
 # ⛏️ SmartMiner Farm Dashboard
 
-A real-time monitoring dashboard for cryptocurrency mining farms built with Streamlit. This dashboard provides unified monitoring of multiple mining workers, displaying hashrates, temperatures, uptime, and profitability metrics in a clean, responsive interface.
+A real-time monitoring dashboard for cryptocurrency mining farms built with Streamlit. This dashboard provides unified monitoring of multiple mining workers, displaying hashrates, temperatures, uptime, and profitability metrics in a clean, responsive interface. For a comprehensive project overview, setup instructions, and details on the Manager service, please refer to the [main project README.md](../README.md) and the [Manager README.md](../manager/README.md).
 
 ## 📋 Table of Contents
 
@@ -84,19 +84,19 @@ The dashboard consists of four main components:
    docker compose up --build -d dashboard
    ```
 
-4. **Access the dashboard** at [http://localhost:8501](http://localhost:8501)
+4. **Access the dashboard** at [http://localhost:16000](http://localhost:16000)
 
 ## 📂 Installation & Setup
 
 ### 1. Configuration
 
-Create your configuration file from the example:
+To configure your dashboard, first create your configuration file from the example:
 
 ```bash
 cp config.example.py config.py
 ```
 
-Edit `config.py` with your mining setup:
+Then, edit `config.py` with your mining setup:
 
 ```python
 # Mining workers configuration
@@ -137,8 +137,8 @@ docker compose down smartminer_dashboard
 ```
 
 Access the dashboard at:
-- http://localhost:8501
-- http://YOUR_SERVER_IP:8501
+- http://localhost:16000
+- http://YOUR_SERVER_IP:16000
 
 ### 3. Local Development (Development)
 
@@ -154,7 +154,7 @@ For development or testing without Docker:
    streamlit run app.py
    ```
 
-3. **Access the dashboard** at http://localhost:8501
+3. **Access the dashboard** at http://localhost:16000
 
 ## 🖥️ User Interface Guide
 

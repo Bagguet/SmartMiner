@@ -3,7 +3,6 @@
 manager/venv/
 venv/
 .env
-json/wallets.json
 *.log
 
 *.png

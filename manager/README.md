@@ -1,6 +1,45 @@
 # 🧠 SmartMiner Manager
 
-The autonomous "brain" of the SmartMiner ecosystem, responsible for real-time market analysis, profit optimization, and containerized mining operations. This service continuously monitors mining profitability and automatically switches between coins to maximize returns.
+The autonomous "brain" of the SmartMiner ecosystem, responsible for real-time market analysis, profit optimization, and containerized mining operations. This service continuously monitors mining profitability and automatically switches between coins to maximize returns. For a comprehensive overview and main setup instructions, please refer to the [main project README.md](../README.md).
+
+## 📚 Table of Contents
+
+- [🚀 Key Features](#-key-features)
+  - [🔄 Autonomous Profit Switching](#-autonomous-profit-switching)
+  - [🐳 Container Orchestration](#-container-orchestration)
+  - [🌐 Advanced Web Scraping Engine](#-advanced-web-scraping-engine)
+  - [Discord Notifications](#discord-notifications)
+  - [🔌 Unified API (Port 4000)](#-unified-api-port-4000)
+- [🛠️ Architecture](#-architecture)
+  - [Core Components](#core-components)
+  - [Data Flow Architecture](#data-flow-architecture)
+- [📂 Configuration](#-configuration)
+  - [1. Wallet Configuration (`json/wallets.json`)](#1-wallet-configuration-jsonwalletsjson)
+  - [2. Mining Links (`links.txt`)](#2-mining-links-linkstxt)
+  - [3. Discord Integration (`.env`)](#3-discord-integration-env)
+  - [4. System Settings (`config.py`)](#4-system-settings-configpy)
+  - [⚙️ Advanced Configuration Options](#-advanced-configuration-options)
+- [📂 Output Files](#-output-files)
+  - [`status.json`](#statusjson)
+  - [`order.json`](#orderjson)
+- [🔌 API Wrapper (Port 4000)](#-api-wrapper-port-4000)
+  - [API Endpoint](#api-endpoint)
+  - [Enhanced Response Format](#enhanced-response-format)
+  - [Temperature Monitoring](#temperature-monitoring)
+  - [System Integration](#system-integration)
+- [🎮 Command Control](#-command-control)
+  - [Available Commands](#available-commands)
+  - [Command Processing](#command-processing)
+- [🐳 Docker Deployment](#-docker-deployment)
+  - [Prerequisites](#prerequisites)
+  - [Container Privileges](#container-privileges)
+  - [Quick Start](#quick-start)
+  - [Required Volumes](#required-volumes)
+- [🔧 Development & Debugging](#-development--debugging)
+  - [Logging System](#logging-system)
+  - [Debug Mode](#debug-mode)
+  - [Common Debugging Commands](#common-debugging-commands)
+  - [Error Handling](#error-handling)
 
 ---
 
@@ -89,7 +128,7 @@ The Manager requires specific configuration files to function properly. All file
 
 ### 1. Wallet Configuration (`json/wallets.json`)
 
-Map coin symbols to your wallet addresses:
+This file maps coin symbols to your wallet addresses. You should copy `json/wallets.example.json` to `json/wallets.json` and then edit it with your actual wallet addresses.
 
 ```json
 {
@@ -105,7 +144,7 @@ Map coin symbols to your wallet addresses:
 
 ### 2. Mining Links (`links.txt`)
 
-Plain text file containing URLs to mining pool dashboards for scraping:
+This is a plain text file containing URLs to mining pool dashboards for scraping. You can create this file or copy it from `manager/links.example.txt` (if it exists) and then customize it.
 
 ```
 https://miningpoolstats.stream/monero
@@ -115,7 +154,7 @@ https://miningpoolstats.stream/quantumrl
 https://miningpoolstats.stream/zephyr
 ```
 
-### 3. Discord Integration (`.env`)
+### 2. Discord Integration (`.env`)
 
 Create a `.env` file with your Discord credentials:
 
@@ -124,7 +163,7 @@ DC_API_KEY=your_discord_bot_token_here
 DC_USER_ID=your_discord_user_id_here
 ```
 
-### 4. System Settings (`config.py`)
+### 3. System Settings (`config.py`)
 
 Core configuration parameters:
 
@@ -155,6 +194,38 @@ PIPE_PATH = "/tmp/miner_comm"                    # Command pipe location
 | `MY_HASHRATE_KH` | int | `17.3` | 1-10000 | Your hardware's hashrate in kH/s |
 | `MINER_THREADS` | int | `1` | 1-64 | Number of CPU threads for XMRig |
 
+
+## 📂 Output Files
+
+The Manager service generates and updates the following JSON files in the shared `json/` directory to communicate with the Dashboard and external mining workers:
+
+### `status.json`
+
+This file contains real-time status updates for the Dashboard, including the currently mined coin, profitability metrics, and other relevant information.
+
+```json
+{
+  "coin": "Monero",
+  "profit_usd": 0.000001,
+  "profit_coin": 0.0000001,
+  "symbol": "XMR",
+  "last_updated": "2024-01-01T12:30:00Z"
+}
+```
+
+### `order.json`
+
+This file dictates the current mining order for external slave miners. It specifies the coin to be mined. Slave miners are expected to read this file and adjust their operations accordingly.
+
+```json
+{
+  "coin": "Monero",
+  "pool": "pool.monero.org:3333",
+  "wallet": "your_monero_wallet_address",
+  "worker_id": "smartminer_worker_1",
+  "last_updated": "2024-01-01T12:30:00Z"
+}
+```
 
 ## 🔌 API Wrapper (Port 4000)
 

@@ -18,22 +18,11 @@ services:
       - ${PWD}/manager/links.txt:/app/links.txt
       - /sys:/sys:ro
     cpus: '2'
-    depends_on:
-      worker_builder:
-        condition: service_completed_successfully
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "3"
-
-
-  worker_builder:
-    build: 
-      context: ./worker
-    image: smartminer_worker_img
-    container_name: builder_helper
-    entrypoint: ["/bin/true"]
 
   dashboard:
     build: ./dashboard
@@ -47,7 +36,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "8501:8501"
+      - "16000:16000"
     logging:
       driver: "json-file"
       options:
@@ -57,10 +46,15 @@ services:
   order_server:
     image: python:3.10-slim
     container_name: smartminer_order_server
-    command: python -m http.server 8080
+    command: python -m http.server 16001
     working_dir: /data
     volumes:
-      - ${PWD}/json/order.json:/data/order.json  
+      - ${PWD}/json:/data
     ports:
-      - "8080:8080"  
+      - "16001:16001"  
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "3"

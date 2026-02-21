@@ -6,7 +6,38 @@
 
 SmartMiner is a fully automated, containerized cryptocurrency mining system designed for CPU mining (RandomX algorithms). It doesn't just mine; it thinks.
 
-The system continuously scrapes real-time network data, calculates profitability based on your hardware, and automatically switches workers to the most profitable coin (Monero, Zephyr, Etica, QuantumRL, Dagger) using intelligent Docker orchestration.
+By continuously scraping real-time network data and calculating profitability based on your hardware, SmartMiner autonomously switches your workers to the most profitable coin (Monero, Zephyr, Etica, QuantumRL, Dagger). This intelligent Docker orchestration ensures your mining operations are always optimized for maximum returns.
+
+## 📚 Table of Contents
+
+- [🚀 Core Features](#-core-features)
+  - [🧠 Intelligent Manager Service](#-intelligent-manager-service)
+  - [📊 Live Dashboard Interface](#-live-dashboard-interface)
+  - [🐳 Containerized Architecture](#-containerized-architecture)
+  - [🌐 Advanced Web Scraping](#-advanced-web-scraping)
+  - [📱 Notifications & Control](#-notifications--control)
+- [🏗️ System Architecture](#-system-architecture)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation & Setup](#installation--setup)
+  - [Initial Configuration](#initial-configuration)
+- [🎮 Management & Control](#-management--control)
+  - [Real-time Control](#real-time-control)
+  - [Monitoring & Logs](#monitoring--logs)
+  - [Service Management](#service-management)
+- [🔧 Advanced Configuration](#-advanced-configuration)
+  - [Manager Settings (`manager/config.py`)](#manager-settings-managerconfigpy)
+  - [Dashboard Settings (`dashboard/config.py`)](#dashboard-settings-dashboardconfigpy)
+- [🔒 Security Considerations](#-security-considerations)
+  - [Container Security](#container-security)
+  - [Data Protection](#data-protection)
+  - [Recommended Practices](#recommended-practices)
+- [🤝 Contributing](#-contributing)
+  - [Development Setup](#development-setup)
+  - [Areas for Enhancement](#areas-for-enhancement)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
 
 ## 🚀 Core Features
 
@@ -39,6 +70,7 @@ The system continuously scrapes real-time network data, calculates profitability
 - **Discord Integration**: Real-time alerts for miner events and coin switches
 - **Command Interface**: Named pipe control for manual mining operations
 - **API Wrapper**: Enhanced HTTP API (port 4000) with system sensor integration
+- **Order Server**: Serves `json/` directory content (orders, status) via HTTP (port 16001) for external consumption.
 - **Comprehensive Logging**: Detailed operation logs with error tracking
 
 ## 🏗️ System Architecture
@@ -48,9 +80,14 @@ The system continuously scrapes real-time network data, calculates profitability
 │                        SmartMiner Farm                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │   Manager       │  │   Dashboard     │  │   Workers       │  │
-│  │   (Port 4000)   │  │   (Port 8501)   │  │   (Port 3000)   │  │
+│  │   Manager       │  │   Dashboard     │  │ External XMRig  │  │
+│  │   (Port 4000)   │  │   (Port 16000)  │  │   Workers       │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐                                            │
+│  │ Order Server    │                                            │
+│  │   (Port 16001)  │                                            │
+│  └─────────────────┘                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
 │  │ Discord Bot     │  │ Web Scraper     │  │ Docker Engine   │  │
@@ -68,6 +105,8 @@ The system continuously scrapes real-time network data, calculates profitability
 │                    Mining Pool Networks                         │
 │  (Monero, Zephyr, Etica, QuantumRL, Dagger)                     │
 └─────────────────────────────────────────────────────────────────┘
+
+The `json/` directory acts as a central hub for inter-component communication, storing mining orders (`order.json`) and real-time status updates (`status.json`) consumed by both the Dashboard and external mining workers.
 ```
 
 ## 📁 Project Structure
@@ -91,14 +130,10 @@ SmartMiner/
 │   ├── data_provider.py    # API client for manager data
 │   ├── config.py           # Dashboard configuration
 │   └── requirements.txt    # Python dependencies
-├── worker/                  # 💪 Mining "Muscle"
-│   ├── Dockerfile          # Optimized XMRig image
 ├── json/                    # 📋 Configuration Files
-│   ├── wallets.json        # Wallet addresses (secure)
-│   ├── pools.json          # Mining pool configurations
 │   ├── status.json         # Real-time status for dashboard
 │   └── order.json          # Current mining orders
-├── docker-compose.yml       # 🐳 Multi-service orchestration
+├── docker-compose.yml       # 🐳 Defines and runs the multi-container SmartMiner application
 └── README.md               # 📖 Project documentation
 ```
 
@@ -120,84 +155,38 @@ SmartMiner/
    cd SmartMiner
    ```
 
-2. **Configure wallet addresses**
-   ```bash
-   cp json/wallets.example.json json/wallets.json
-   # Edit with your actual wallet addresses
-   ```
-
-3. **Set up Discord notifications (optional)**
+2. **Set up Discord notifications (optional)**
    ```bash
    cp manager/.example.env manager/.env
    # Edit with your Discord bot token and user ID
    ```
-4. **Set up config for dashboard**
+3. **Set up config for dashboard**
    ```bash
    cp dashboard/config.example.py dashboard/config.py
    # Edit with your worker configurations
    ```
 
-5. **Start the complete stack**
+4. **Start the complete stack**
    ```bash
    docker compose up -d --build
    ```
 
-6. **Access the dashboard**
+5. **Access the dashboard**
    ```
-   http://localhost:8501
-   # or http://YOUR_SERVER_IP:8501
+   http://YOUR_SERVER_IP:16000
    ```
-
-### Initial Configuration
-
-Edit the main configuration files:
-
-**`json/wallets.json`** - Your wallet addresses:
-```json
-{
-  "Monero": "your_monero_wallet_address",
-  "Zephyr": "your_zephyr_wallet_address",
-  "Etica": "your_etica_wallet_address"
-}
-```
-
-**`json/pools.json`** - Mining pool configurations:
-```json
-{
-  "Monero": "pool.monero.org:3333",
-  "Zephyr": "zephyr.miningpoolstats.stream:5555",
-  "Etica": "etica.miningpoolstats.stream:7777"
-}
-```
-
-## 🎮 Management & Control
-
-### Real-time Control
-
-Control the mining manager using the command pipe:
-
-```bash
-# Pause mining operations
-echo "miner stop" > /tmp/miner_comm
-
-# Resume mining operations
-echo "miner start" > /tmp/miner_comm
-
-# Check current status
-echo "status" > /tmp/miner_comm
-```
 
 ### Monitoring & Logs
 
 ```bash
 # View manager logs (brain activity)
-docker compose logs -f manager
+docker logs -f manager
 
 # View dashboard logs (UI activity)
-docker compose logs -f dashboard
+docker logs -f dashboard
 
 # View all services status
-docker compose ps
+docker ps
 
 # Check real-time API data
 curl http://localhost:4000/1/summary
